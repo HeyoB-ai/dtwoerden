@@ -71,7 +71,7 @@ export function WijkOverlay({
         layout: {
           "text-field": ["get", "naam"],
           "text-size": 11,
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Noto Sans Regular"],
         },
         paint: {
           "text-color": "#f0f4f8",

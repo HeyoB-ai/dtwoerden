@@ -136,7 +136,7 @@ export function WaterLayer({
           "text-size": 10,
           "text-offset": [0, 1.3],
           "text-anchor": "top",
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Noto Sans Regular"],
         },
         paint: { "text-color": "#cbd5e1", "text-halo-color": "#0a0f1e", "text-halo-width": 1.2 },
       });

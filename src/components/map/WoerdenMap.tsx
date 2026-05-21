@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Map as MlMap, StyleSpecification } from "maplibre-gl";
+import type { Map as MlMap } from "maplibre-gl";
 import { WOERDEN_CENTER } from "@/lib/data/wijken";
 import { cn } from "@/lib/utils";
 
@@ -18,34 +18,18 @@ interface MapCtx {
 const MapContext = createContext<MapCtx>({ map: null });
 export const useMap = () => useContext(MapContext).map;
 
-// Free dark OSM-based basemap (CARTO dark_all) — no API key required.
-const DARK_STYLE: StyleSpecification = {
-  version: 8,
-  glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-  sources: {
-    carto: {
-      type: "raster",
-      tiles: [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution: "© OpenStreetMap contributors © CARTO",
-    },
-  },
-  layers: [
-    { id: "bg", type: "background", paint: { "background-color": "#0a0f1e" } },
-    { id: "carto", type: "raster", source: "carto", paint: { "raster-opacity": 0.85 } },
-  ],
-};
+// Free dark OSM-based vector basemap (OpenFreeMap "dark") — no API key, not on
+// ad/tracker blocklists. Bundles glyphs/sprite/sources in a single style.json.
+export const DEFAULT_MAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
+// Font available in the OpenFreeMap dark style's glyph set (used by overlay labels).
+export const MAP_FONT = ["Noto Sans Regular"];
 
 interface WoerdenMapProps {
   center?: [number, number];
   zoom?: number;
   className?: string;
   interactive?: boolean;
+  styleUrl?: string;
   children?: ReactNode;
 }
 
@@ -54,6 +38,7 @@ export function WoerdenMap({
   zoom = 12,
   className,
   interactive = true,
+  styleUrl = DEFAULT_MAP_STYLE,
   children,
 }: WoerdenMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,7 +54,7 @@ export function WoerdenMap({
       if (cancelled || !containerRef.current) return;
       mapInstance = new maplibregl.Map({
         container: containerRef.current,
-        style: DARK_STYLE,
+        style: styleUrl,
         center,
         zoom,
         interactive,

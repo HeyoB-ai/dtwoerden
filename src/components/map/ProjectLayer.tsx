@@ -63,7 +63,7 @@ export function ProjectLayer({
           "text-offset": [0, 1.4],
           "text-anchor": "top",
           "text-max-width": 9,
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Noto Sans Regular"],
         },
         paint: { "text-color": "#cbd5e1", "text-halo-color": "#0a0f1e", "text-halo-width": 1.2 },
       });

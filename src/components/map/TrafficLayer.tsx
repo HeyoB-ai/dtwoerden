@@ -69,7 +69,7 @@ export function TrafficLayer({ onSelectRoad }: { onSelectRoad?: (id: string) => 
           "text-field": "▶",
           "text-size": 12,
           "text-keep-upright": false,
-          "text-font": ["Open Sans Regular"],
+          "text-font": ["Noto Sans Regular"],
         },
         paint: { "text-color": "#0a0f1e", "text-halo-color": "#ffffff", "text-halo-width": 0.4 },
       });
