@@ -15,6 +15,7 @@ AI-gestuurd stadsadvies in één samenhangend, donker gemeentelijk dashboard.
 5. **Infrastructuur & Ontwikkelingen** — projecten op kaart + Gantt-tijdlijn 2025–2030.
 6. **Evenementen & Openbare Ruimte** — agenda, impactanalyse, meldingenfeed.
 7. **AI Stadsadvies** — "Woerden Insights" + automatisch gegenereerd stadsrapport.
+8. **Scenario Simulator** — vrij ingevoerd crisisscenario → AI berekent cascade-effecten over alle domeinen, projecteert op de kaart. Aangedreven door de Anthropic Claude API.
 
 ## Tech stack
 
@@ -50,10 +51,19 @@ realistische meting genereert (seizoens- en spitsafhankelijk) en scenario-modifi
 
 ```bash
 npm install
+cp .env.example .env.local   # vul ANTHROPIC_API_KEY in voor de Scenario Simulator
 npm run dev      # http://localhost:3000
 npm run build    # productiebuild
 npm start        # productieserver
 ```
 
+### Scenario Simulator (Claude API)
+
+Het scherm `/scenarios` roept de **Anthropic Claude API** aan (`src/app/api/scenario/route.ts`)
+met forced tool use voor gestructureerde output en prompt caching op de statische Woerden-context.
+Zet `ANTHROPIC_API_KEY` in `.env.local`. Zonder key valt de simulator terug op een lokaal
+heuristisch model, zodat de demo blijft werken. Model is in te stellen via `ANTHROPIC_MODEL`
+(standaard `claude-opus-4-7`).
+
 Alle teksten zijn in het **Nederlands**. Kaart-tiles vereisen internettoegang
-(OpenStreetMap via CARTO).
+(OpenStreetMap via OpenFreeMap).

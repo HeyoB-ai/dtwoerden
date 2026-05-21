@@ -19,6 +19,7 @@ const ROUTE_TITLE: Record<string, { title: string; subtitle: string }> = {
   "/infrastructuur": { title: "Infrastructuur & Ontwikkelingen", subtitle: "Actieve en geplande projecten 2025–2030" },
   "/evenementen": { title: "Evenementen & Openbare Ruimte", subtitle: "Agenda, impact en meldingen openbare ruimte" },
   "/ai-advies": { title: "AI Stadsadvies", subtitle: "Woerden Insights — datagedreven aanbevelingen" },
+  "/scenarios": { title: "Scenario Simulator", subtitle: "AI-cascade-analyse — vrij ingevoerde crisisscenario's" },
 };
 
 export function AppShell({ children }: { children: ReactNode }) {

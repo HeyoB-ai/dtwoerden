@@ -6,6 +6,7 @@ import {
   HardHat,
   CalendarDays,
   Sparkles,
+  FlaskConical,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,4 +25,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/infrastructuur", label: "Infrastructuur", sub: "Projecten", icon: HardHat },
   { href: "/evenementen", label: "Evenementen", sub: "Openbare ruimte", icon: CalendarDays },
   { href: "/ai-advies", label: "AI Stadsadvies", sub: "Woerden Insights", icon: Sparkles },
+  { href: "/scenarios", label: "Scenario Simulator", sub: "AI cascade-analyse", icon: FlaskConical },
 ];
