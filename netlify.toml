@@ -1,0 +1,19 @@
+# Netlify configuration — Woerden360 (Next.js 14)
+
+[build]
+  command = "npm run build"
+
+# Next.js App Router routes (incl. /api/scenario) run inside this plugin's
+# server-handler function. Do NOT add a redirect from /api/* to
+# /.netlify/functions/* — the plugin handles routing; such a redirect points at
+# a non-existent function and breaks the API routes.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  # Raise the synchronous function timeout from the 10s default to Netlify's
+  # 26s maximum so the /api/scenario handler has room to call Claude.
+  # (Next.js `export const maxDuration` is Vercel-only and ignored on Netlify;
+  #  the Claude call itself is bounded to 20s in the route so we return well
+  #  inside this window instead of hitting a gateway 504.)
+  timeout = 26
