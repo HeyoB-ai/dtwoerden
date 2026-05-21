@@ -2,18 +2,19 @@
 
 [build]
   command = "npm run build"
+  publish = ".next"
 
-# Next.js App Router routes (incl. /api/scenario) run inside this plugin's
-# server-handler function. Do NOT add a redirect from /api/* to
-# /.netlify/functions/* — the plugin handles routing; such a redirect points at
-# a non-existent function and breaks the API routes.
+[build.environment]
+  NODE_VERSION = "20"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[functions]
-  # Raise the synchronous function timeout from the 10s default to Netlify's
-  # 26s maximum so the /api/scenario handler has room to call Claude.
-  # (Next.js `export const maxDuration` is Vercel-only and ignored on Netlify;
-  #  the Claude call itself is bounded to 20s in the route so we return well
-  #  inside this window instead of hitting a gateway 504.)
+# `timeout` is NOT valid directly under [functions]; it must be per-function.
+# The Next.js runtime serves every route (incl. /api/scenario) through a single
+# bundled function named "__netlify-handler" — NOT "api/scenario" — so a block
+# keyed to the route path would match nothing. The wildcard reliably applies the
+# 26s max timeout to that handler. (Requires a plan that allows >10s; Starter/
+# Free are capped at 10s regardless — use a faster ANTHROPIC_MODEL there.)
+[functions."*"]
   timeout = 26
