@@ -66,7 +66,7 @@ export default function EvenementenPage() {
           bodyClassName="p-0"
         >
           <div className="relative">
-            <WoerdenMap zoom={11.5} className="h-[460px]">
+            <WoerdenMap zoom={11.5} height={460}>
               {layer === "events" ? (
                 <PointLayer id="events" points={eventPoints} radius={7} pulse onSelect={setEventId} selectedId={eventId} />
               ) : (

@@ -62,7 +62,7 @@ export default function InfrastructuurPage() {
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel className="xl:col-span-2" title="Projecten op de kaart" icon={<MapIcon className="h-4 w-4 text-water" />} bodyClassName="p-0">
-          <WoerdenMap zoom={11.5} className="h-[460px]">
+          <WoerdenMap zoom={11.5} height={460}>
             <ProjectLayer visible={visible} onSelect={setSelectedId} selectedId={selectedId} />
           </WoerdenMap>
         </Panel>

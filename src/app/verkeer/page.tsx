@@ -60,7 +60,7 @@ export default function VerkeerPage() {
           bodyClassName="p-0"
         >
           <div className="relative">
-            <WoerdenMap zoom={11.5} className="h-[480px]">
+            <WoerdenMap zoom={11.5} height={480}>
               <TrafficLayer onSelectRoad={setRoadId} />
             </WoerdenMap>
             <div className="absolute left-3 top-3 z-10">

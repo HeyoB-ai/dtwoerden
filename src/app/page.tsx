@@ -181,7 +181,7 @@ export default function DashboardPage() {
           bodyClassName="p-0"
         >
           <div className="relative">
-            <WoerdenMap zoom={11.5} className="h-[460px]">
+            <WoerdenMap zoom={11.5} height={460}>
               <WijkOverlay mode={mode} onSelect={setSelected} selected={selected} />
               <WaterLayer showGemalen={false} />
               <PointLayer id="pois" points={poiPoints} radius={5} pulse />

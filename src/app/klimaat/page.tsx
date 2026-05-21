@@ -96,7 +96,7 @@ export default function KlimaatPage() {
           <div className="grid gap-4 xl:grid-cols-3">
             <Panel className="xl:col-span-2" title="Luchtkwaliteit per wijk (AQI)" icon={<Wind className="h-4 w-4 text-water" />} bodyClassName="p-0">
               <div className="relative">
-                <WoerdenMap zoom={11.5} className="h-[420px]">
+                <WoerdenMap zoom={11.5} height={420}>
                   <WijkOverlay mode="lucht" onSelect={setSelWijk} selected={selWijk} />
                   <PointLayer id="sensoren" points={sensorPoints} radius={5} pulse />
                 </WoerdenMap>
@@ -159,7 +159,7 @@ export default function KlimaatPage() {
           <div className="grid gap-4 xl:grid-cols-3">
             <Panel className="xl:col-span-2" title="Hitte-eiland effect" icon={<Thermometer className="h-4 w-4 text-alert-orange" />} bodyClassName="p-0">
               <div className="relative">
-                <WoerdenMap zoom={11.5} className="h-[420px]">
+                <WoerdenMap zoom={11.5} height={420}>
                   <WijkOverlay mode="hitte" onSelect={setSelWijk} selected={selWijk} />
                 </WoerdenMap>
                 <div className="absolute left-3 top-3 z-10">

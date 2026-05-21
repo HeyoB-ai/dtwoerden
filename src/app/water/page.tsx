@@ -63,7 +63,7 @@ export default function WaterPage() {
       <div className="grid gap-4 xl:grid-cols-3">
         <Panel className="xl:col-span-2" title="Waterinfrastructuur Woerden" icon={<Droplets className="h-4 w-4 text-water" />} bodyClassName="p-0">
           <div className="relative">
-            <WoerdenMap zoom={11.5} className="h-[460px]">
+            <WoerdenMap zoom={11.5} height={460}>
               <WijkOverlay mode="water" />
               <WaterLayer showGemalen belasting={belastingMap} />
             </WoerdenMap>

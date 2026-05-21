@@ -27,6 +27,8 @@ export const MAP_FONT = ["Noto Sans Regular"];
 interface WoerdenMapProps {
   center?: [number, number];
   zoom?: number;
+  /** Explicit pixel height for the GL container (avoids 0-height %/h-full pitfalls). */
+  height?: number;
   className?: string;
   interactive?: boolean;
   styleUrl?: string;
@@ -36,6 +38,7 @@ interface WoerdenMapProps {
 export function WoerdenMap({
   center = WOERDEN_CENTER,
   zoom = 12,
+  height = 460,
   className,
   interactive = true,
   styleUrl = DEFAULT_MAP_STYLE,
@@ -48,6 +51,7 @@ export function WoerdenMap({
     if (!containerRef.current) return;
     let cancelled = false;
     let mapInstance: MlMap | null = null;
+    let ro: ResizeObserver | null = null;
 
     (async () => {
       const maplibregl = (await import("maplibre-gl")).default;
@@ -72,13 +76,23 @@ export function WoerdenMap({
           "top-right",
         );
       }
+
+      // Keep the GL canvas in sync with the container size (tabs, layout shifts).
+      ro = new ResizeObserver(() => mapInstance?.resize());
+      ro.observe(containerRef.current);
+
       mapInstance.on("load", () => {
-        if (!cancelled) setMap(mapInstance);
+        if (cancelled || !mapInstance) return;
+        mapInstance.resize(); // ensure correct canvas size once visible
+        setMap(mapInstance);
+        // catch any late layout settling (fonts, flex/grid reflow)
+        requestAnimationFrame(() => mapInstance?.resize());
       });
     })();
 
     return () => {
       cancelled = true;
+      ro?.disconnect();
       mapInstance?.remove();
       setMap(null);
     };
@@ -86,8 +100,11 @@ export function WoerdenMap({
   }, []);
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg border border-border", className)}>
-      <div ref={containerRef} className="absolute inset-0" />
+    <div
+      className={cn("relative overflow-hidden rounded-lg border border-border", className)}
+      style={{ height, minHeight: height }}
+    >
+      <div ref={containerRef} style={{ width: "100%", height }} />
       {!map && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink/60">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
