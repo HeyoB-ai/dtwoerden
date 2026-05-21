@@ -47,6 +47,8 @@ export interface ScenarioAnalyse {
   tijdlijn: TijdlijnPunt[];
   kaart: ScenarioKaart;
   bron: "claude" | "lokaal";
+  /** Optional notice surfaced when the Claude API was unavailable and the local engine was used. */
+  apiNotice?: string;
 }
 
 export interface ScenarioParams {

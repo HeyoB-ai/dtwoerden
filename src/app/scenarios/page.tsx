@@ -186,8 +186,13 @@ export default function ScenariosPage() {
                 <div>
                   <div className="text-sm font-semibold">Scenario actief: {result.scenarioNaam}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    Bron: {result.bron === "claude" ? "Claude AI" : "lokaal model (geen API-key)"}
+                    Bron: {result.bron === "claude" ? "Claude AI" : "lokaal model"}
                   </div>
+                  {result.apiNotice && (
+                    <div className="mt-0.5 flex items-center gap-1 text-[11px] text-alert-orange">
+                      <AlertTriangle className="h-3 w-3 shrink-0" /> {result.apiNotice}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-4">

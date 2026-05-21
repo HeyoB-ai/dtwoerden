@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import type { Group, Mesh } from "three";
 
@@ -88,18 +88,53 @@ function Scene() {
 }
 
 export default function CityViz() {
+  const [lost, setLost] = useState(false);
+  const [renderKey, setRenderKey] = useState(0);
+
   return (
-    <Canvas
-      camera={{ position: [8, 7, 8], fov: 42 }}
-      dpr={[1, 1.75]}
-      gl={{ antialias: true, alpha: true }}
-      style={{ width: "100%", height: "100%" }}
-    >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[6, 10, 4]} intensity={1.1} />
-      <pointLight position={[-6, 4, -6]} intensity={0.6} color="#0ea5e9" />
-      <Scene />
-      <fog attach="fog" args={["#0a0f1e", 14, 28]} />
-    </Canvas>
+    <div className="relative h-full w-full">
+      <Canvas
+        key={renderKey}
+        camera={{ position: [8, 7, 8], fov: 42 }}
+        dpr={[1, 1.75]}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        style={{ width: "100%", height: "100%" }}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement;
+          // Handle GPU context loss (tab backgrounded, low VRAM) so the viewer
+          // can recover instead of going permanently black.
+          canvas.addEventListener(
+            "webglcontextlost",
+            (e) => {
+              e.preventDefault();
+              setLost(true);
+            },
+            false,
+          );
+          canvas.addEventListener("webglcontextrestored", () => setLost(false), false);
+        }}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[6, 10, 4]} intensity={1.1} />
+        <pointLight position={[-6, 4, -6]} intensity={0.6} color="#0ea5e9" />
+        <Scene />
+        <fog attach="fog" args={["#0a0f1e", 14, 28]} />
+      </Canvas>
+
+      {lost && (
+        <button
+          onClick={() => {
+            setLost(false);
+            setRenderKey((k) => k + 1); // remount Canvas → fresh WebGL context
+          }}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-ink/80 text-xs text-muted-foreground backdrop-blur"
+        >
+          <span>3D-weergave onderbroken (WebGL-context verloren)</span>
+          <span className="rounded-md border border-water/40 px-3 py-1.5 font-medium text-water">
+            Klik om te herstellen
+          </span>
+        </button>
+      )}
+    </div>
   );
 }

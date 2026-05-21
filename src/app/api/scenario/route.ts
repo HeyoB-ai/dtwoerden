@@ -5,9 +5,14 @@ import { VALID_ROAD_IDS, VALID_WIJK_IDS } from "@/lib/scenario/types";
 import { lokaleAnalyse } from "@/lib/scenario/fallback";
 
 export const runtime = "nodejs";
+// Upper bound for the serverless function. Must be >= the SDK timeout below so
+// the handler can return a graceful fallback before the platform issues a 504.
 export const maxDuration = 60;
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
+// Hard ceiling on the Claude call. Kept under common gateway limits so the
+// route always responds (with a fallback) instead of hanging into a 504.
+const TIMEOUT_MS = Number(process.env.SCENARIO_TIMEOUT_MS) || 25000;
 
 // Static system context — cached across requests via prompt caching.
 const SYSTEM_PROMPT = `Je bent de AI-analyse-engine van "Woerden360", het digital-twin platform van de gemeente Woerden (Nederland). Je analyseert vrij ingevoerde crisisscenario's en berekent de cascade-effecten over alle stedelijke domeinen.
@@ -126,26 +131,36 @@ function sanitize(raw: Record<string, unknown>): ScenarioAnalyse {
 }
 
 export async function POST(req: Request) {
-  let body: ScenarioRequest;
   try {
-    body = (await req.json()) as ScenarioRequest;
-  } catch {
-    return NextResponse.json({ error: "Ongeldige aanvraag" }, { status: 400 });
-  }
-  const scenario = (body.scenario || "").trim();
-  const params = body.params ?? { omvang: 50, duur: "12 uur", tijdstip: "spits" };
-  if (!scenario) {
-    return NextResponse.json({ error: "Beschrijf eerst een scenario" }, { status: 400 });
-  }
+    let body: ScenarioRequest;
+    try {
+      body = (await req.json()) as ScenarioRequest;
+    } catch {
+      return NextResponse.json({ error: "Ongeldige aanvraag (geen geldige JSON)." }, { status: 400 });
+    }
 
-  // No API key configured → use the deterministic local engine so the demo still works.
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json(lokaleAnalyse(scenario, params));
-  }
+    const scenario = (body.scenario || "").trim();
+    const params = body.params ?? { omvang: 50, duur: "12 uur", tijdstip: "spits" };
+    if (!scenario) {
+      return NextResponse.json({ error: "Beschrijf eerst een scenario." }, { status: 400 });
+    }
 
-  try {
-    const client = new Anthropic();
-    const userText = `Analyseer het volgende crisisscenario voor de gemeente Woerden.
+    // No API key configured → deterministic local engine so the demo still works.
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({
+        ...lokaleAnalyse(scenario, params),
+        apiNotice: "ANTHROPIC_API_KEY niet ingesteld — lokaal model gebruikt.",
+      });
+    }
+
+    try {
+      const client = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+        timeout: TIMEOUT_MS,
+        maxRetries: 1,
+      });
+
+      const userText = `Analyseer het volgende crisisscenario voor de gemeente Woerden.
 
 SCENARIO:
 ${scenario}
@@ -157,24 +172,44 @@ PARAMETERS:
 
 Rapporteer de volledige cascade-analyse via de tool.`;
 
-    const msg = await client.messages.create({
-      model: MODEL,
-      max_tokens: 8000,
-      system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-      tools: [TOOL],
-      tool_choice: { type: "tool", name: "rapporteer_scenario_analyse" },
-      messages: [{ role: "user", content: userText }],
-    });
+      const msg = await client.messages.create({
+        model: MODEL,
+        max_tokens: 8000,
+        system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+        tools: [TOOL],
+        tool_choice: { type: "tool", name: "rapporteer_scenario_analyse" },
+        messages: [{ role: "user", content: userText }],
+      });
 
-    const toolBlock = msg.content.find((b) => b.type === "tool_use");
-    if (!toolBlock || toolBlock.type !== "tool_use") {
-      return NextResponse.json(lokaleAnalyse(scenario, params));
+      const toolBlock = msg.content.find((b) => b.type === "tool_use");
+      if (!toolBlock || toolBlock.type !== "tool_use") {
+        return NextResponse.json({
+          ...lokaleAnalyse(scenario, params),
+          apiNotice: "Claude gaf geen gestructureerd antwoord — lokaal model gebruikt.",
+        });
+      }
+      return NextResponse.json(sanitize(toolBlock.input as Record<string, unknown>));
+    } catch (apiErr) {
+      // Claude call failed (timeout, rate limit, auth, overload). Don't 504 —
+      // fall back to the local engine and surface a readable notice.
+      console.error("Scenario Claude API error:", apiErr);
+      const reden =
+        apiErr instanceof Anthropic.APIError
+          ? `${apiErr.status ?? ""} ${apiErr.message}`.trim()
+          : apiErr instanceof Error
+            ? apiErr.message
+            : "Onbekende fout";
+      return NextResponse.json({
+        ...lokaleAnalyse(scenario, params),
+        apiNotice: `Claude API niet beschikbaar (${reden}) — lokaal model gebruikt.`,
+      });
     }
-    return NextResponse.json(sanitize(toolBlock.input as Record<string, unknown>));
-  } catch (err) {
-    // On any API failure, fall back to the local engine rather than breaking the UI.
-    console.error("Scenario API error:", err);
-    const fallback = lokaleAnalyse(scenario, params);
-    return NextResponse.json(fallback);
+  } catch (error) {
+    // Truly unexpected — return a readable 500 so the Network tab shows the cause.
+    console.error("Scenario API error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Onbekende serverfout" },
+      { status: 500 },
+    );
   }
 }
