@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 50% 8%; /* #0a0f1e */
+    --foreground: 210 33% 96%; /* #f0f4f8 */
+
+    --card: 222 40% 11%; /* #111827 */
+    --card-foreground: 210 33% 96%;
+
+    --popover: 222 44% 9%;
+    --popover-foreground: 210 33% 96%;
+
+    --primary: 199 89% 48%; /* water blue */
+    --primary-foreground: 224 50% 8%;
+
+    --secondary: 215 30% 16%;
+    --secondary-foreground: 210 33% 96%;
+
+    --muted: 215 30% 14%;
+    --muted-foreground: 215 20% 62%; /* #8b9ab0 */
+
+    --accent: 217 50% 18%;
+    --accent-foreground: 210 33% 96%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 33% 96%;
+
+    --border: 215 32% 17%; /* #1e2a3a */
+    --input: 215 32% 17%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.65rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+  }
+  body {
+    font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(215 32% 22%);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(215 32% 30%);
+}
+
+/* MapLibre overrides for dark theme */
+.maplibregl-map {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  background: rgba(10, 15, 30, 0.6) !important;
+  color: #8b9ab0 !important;
+}
+.maplibregl-ctrl-attrib a {
+  color: #8b9ab0 !important;
+}
+.maplibregl-popup-content {
+  background: #111827 !important;
+  color: #f0f4f8 !important;
+  border: 1px solid #1e2a3a !important;
+  border-radius: 0.65rem !important;
+  padding: 0 !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: #111827 !important;
+  border-bottom-color: #111827 !important;
+}
+.maplibregl-popup-close-button {
+  color: #8b9ab0 !important;
+  font-size: 18px;
+  padding: 4px 8px;
+}
+.maplibregl-ctrl-group {
+  background: #111827 !important;
+  border: 1px solid #1e2a3a !important;
+}
+.maplibregl-ctrl-group button {
+  background: transparent !important;
+}
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid #1e2a3a !important;
+}
+.maplibregl-ctrl-icon {
+  filter: invert(0.7);
+}
+
+/* Utility: subtle glass panel */
+.glass {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(13, 18, 32, 0.9));
+  backdrop-filter: blur(12px);
+}
+
+.grid-glow {
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(14, 165, 233, 0.08), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(59, 130, 246, 0.06), transparent 35%);
+}
+
+/* number transitions */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
